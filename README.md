@@ -38,19 +38,19 @@ func Register[T any](id string, constructor func() (*T, error))
 ### Example
 
 ```go
-	di.Register("serviceA", func() (*ServiceA, error) { // <- Register service A
-		return &ServiceA{}, nil
-	})
-	di.Register("serviceB", func() (*ServiceB, error) { // <- Register service B, that depends from service A
-		serviceA, err := di.Get[ServiceA]() // <- Get dependency from container by type
-		if err != nil {
-			return nil, err
-		}
+di.Register("serviceA", func() (*ServiceA, error) { // <- Register service A
+    return &ServiceA{}, nil
+})
+di.Register("serviceB", func() (*ServiceB, error) { // <- Register service B, that depends from service A
+    serviceA, err := di.Get[ServiceA]() // <- Get dependency from container by type
+    if err != nil {
+        return nil, err
+    }
 
-		return &ServiceB{
-			ServiceA: serviceA[0],
-		}, nil
-	})
+    return &ServiceB{
+        ServiceA: serviceA[0],
+    }, nil
+})
 
 // Do work ...
 service, err := di.GetById[ServiceB]("serviceB") // <- Get instantinated service B
