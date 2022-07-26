@@ -15,8 +15,13 @@ func init() {
 	cache = sync.Map{}
 }
 
+// Register service in di
+func Register[T any](id string, constructor func() (*T, error)) {
+	services.Store(id, constructor)
+}
+
 // Get services by type
-func Get[T any]() ([]*T, error) {
+func GetByType[T any]() ([]*T, error) {
 	var err error
 	result := []*T{}
 	services.Range(func(id, constructor any) bool {
@@ -40,13 +45,38 @@ func Get[T any]() ([]*T, error) {
 	return result, err
 }
 
-// Get service by type and id
-func GetById[T any](id string) (*T, error) {
+// Get services by interface
+func GetByInterface[Interface any]() ([]Interface, error) {
+	var err error
+	result := []Interface{}
+	services.Range(func(id, constructor any) bool {
+		if constructor, ok := constructor.(func() (Interface, error)); ok {
+			if instance, ok := cache.Load(id); ok {
+				if instance, ok := instance.(Interface); ok {
+					result = append(result, instance)
+				}
+				return true
+			}
+			instance, instErr := constructor()
+			if instErr != nil {
+				err = instErr
+				return false
+			}
+			cache.Store(id, instance)
+			result = append(result, instance)
+		}
+		return true
+	})
+	return result, err
+}
+
+// Get service by id and type
+func Get[T any](id string) (*T, error) {
 	if instance, ok := cache.Load(id); ok {
 		if instance, ok := instance.(*T); ok {
 			return instance, nil
 		}
-		return nil, fmt.Errorf("invalid type %t for service %s", instance, id)
+		return nil, fmt.Errorf("invalid type for service %s (%t)", id, instance)
 	}
 	if constructor, ok := services.Load(id); ok {
 		if constructor, ok := constructor.(func() (*T, error)); ok {
@@ -57,11 +87,7 @@ func GetById[T any](id string) (*T, error) {
 			cache.Store(id, instance)
 			return instance, nil
 		}
-		return nil, fmt.Errorf("invalid type %t for service %s", constructor, id)
+		return nil, fmt.Errorf("invalid constructor")
 	}
 	return nil, fmt.Errorf("unknown service %s", id)
-}
-
-func Register[T any](id string, constructor func() (*T, error)) {
-	services.Store(id, constructor)
 }

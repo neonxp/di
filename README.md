@@ -17,12 +17,17 @@ di.Register("service id", func () (*Service, error) { /* construct service */ })
 Get dependencies by type:
 
 ```go
-services, err := di.Get[Service]()
+services, err := di.GetByType[Service]()
 ```
 
 Get dependencies by type and id:
 ```go
-service, err := di.GetById[Service]("service id")
+service, err := di.Get[Service]("service id")
+```
+
+Get dependencies by interface:
+```go
+services, err := di.GetByInterface[Worker]() // Worker is interface for many workers
 ```
 
 ### Go doc
@@ -30,8 +35,9 @@ service, err := di.GetById[Service]("service id")
 ```go
 package di // import "go.neonxp.dev/di"
 
-func Get[T any]() ([]*T, error)
-func GetById[T any](id string) (*T, error)
+func Get[T any](id string) (*T, error)
+func GetByInterface[Interface any]() ([]Interface, error)
+func GetByType[T any]() ([]*T, error)
 func Register[T any](id string, constructor func() (*T, error))
 ```
 
@@ -53,7 +59,7 @@ di.Register("serviceB", func() (*ServiceB, error) { // <- Register service B, th
 })
 
 // Do work ...
-service, err := di.GetById[ServiceB]("serviceB") // <- Get instantinated service B
+service, err := di.Get[ServiceB]("serviceB") // <- Get instantinated service B
 if err != nil {
     panic(err)
 }
