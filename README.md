@@ -1,5 +1,7 @@
 # Go Dependency Inject Container
 
+Main repo: [https://gitrepo.ru/neonxp/di](https://gitrepo.ru/neonxp/di). Github is only mirror.
+
 Simple dependecy inject container with generics.
 
 Use for your own risk!
