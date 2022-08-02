@@ -1,13 +1,14 @@
-build:
-  image: golang:1.18.5
-  environment:
-    - GOOS=linux
-    - GOARCH=amd64
-    - CGO_ENABLED=0
-  commands:
-    - go test -cover -coverprofile coverage.out
+---
+kind: pipeline
+type: docker
+name: linux-amd64
 
-publish:
-  coverage:
-    when:
-      branch: master
+platform:
+  arch: amd64
+  os: linux
+
+steps:
+  - name: test
+    image: golang:1.14.15
+    commands:
+    - go test ./...
